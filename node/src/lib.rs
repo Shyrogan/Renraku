@@ -29,7 +29,7 @@ pub struct NodeArguments {
 }
 
 ///
-pub fn configure(args: NodeArguments) -> Result<(NodeId, HashMap<NodeId, TcpStream>)> {
+pub fn configure(args: NodeArguments) -> Result<(usize, NodeId, HashMap<NodeId, TcpStream>)> {
     let controller_socket = UdpSocket::bind("localhost:0")?;
     let tcp_listener = TcpListener::bind("localhost:0")?;
     let mut buf = [0; 1024];
@@ -41,7 +41,7 @@ pub fn configure(args: NodeArguments) -> Result<(NodeId, HashMap<NodeId, TcpStre
     )?;
     // Receive a first message that contains the ID.
     controller_socket.recv(&mut buf)?;
-    let id = bincode::deserialize::<NodeId>(&buf)?;
+    let (node_count, id) = bincode::deserialize::<(usize, NodeId)>(&buf)?;
     // Receive a second message with the number of addresses we have to connect to
     // since at least one program will only receive connections, we know this will
     // not block each of our nodes.
@@ -76,5 +76,5 @@ pub fn configure(args: NodeArguments) -> Result<(NodeId, HashMap<NodeId, TcpStre
         id_to_stream.insert(stream_id, stream);
     }
 
-    Ok((id, id_to_stream))
+    Ok((node_count, id, id_to_stream))
 }

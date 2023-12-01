@@ -40,7 +40,7 @@ fn main() -> Result<()> {
     for (i, addr) in addresses.iter().enumerate() {
         // First sends each of the program their ids
         let id = NodeId(i + 1);
-        socket.send_to(&bincode::serialize(&id)?, addr)?;
+        socket.send_to(&bincode::serialize(&(addresses.len(), id.clone()))?, addr)?;
         // Then we count the number of connections they will receive
         let incoming_connections = graph.edges.iter().filter(|e| e.1 == id).count();
         socket.send_to(&bincode::serialize(&incoming_connections)?, addr)?;
